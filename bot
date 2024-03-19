@@ -1,0 +1,54 @@
+import discord
+from discord.ext import commands
+
+intents = discord.Intents.default()
+intents.message_content = True
+bot = commands.Bot(command_prefix='!', intents=intents)
+
+# Comando per controllare se il cibo è adatto in base all'allergia
+@bot.command()
+async def food(ctx, allergia: str):
+    allergia = allergia.lower()
+    if allergia not in ["latte", "carne", "piccante"]:
+        await ctx.send("Allergia non valida. Le opzioni sono 'latte', 'carne' o 'piccante'.")
+        return
+
+    if ctx.message.attachments:
+        for attachment in ctx.message.attachments:
+            file_name = attachment.filename
+            file_url = attachment.url
+            await attachment.save(f"./{file_name}")
+            risposta = verifica_cibo(allergia, file_name)
+            await ctx.send(risposta)
+    else:
+        await ctx.send("Hai dimenticato di inserire un'immagine del cibo 😢")
+
+# Funzione per verificare se il cibo è adatto all'allergia specificata
+def verifica_cibo(allergia, file_name):
+    if allergia == "latte":
+        # Logica per verificare se il cibo contiene latte
+        if "latte" in file_name.lower():
+            return "Non puoi mangiare questo cibo! 🚫 Contiene latte."
+        else:
+            return "Puoi mangiare questo cibo! 🥳"
+    elif allergia == "carne":
+        # Logica per verificare se il cibo contiene carne
+        if "carne" in file_name.lower():
+            return "Non puoi mangiare questo cibo! 🚫 Contiene carne."
+        else:
+            return "Puoi mangiare questo cibo! 🥳"
+    elif allergia == "piccante":
+        # Logica per verificare se il cibo è troppo piccante
+        if "piccante" in file_name.lower():
+            return "Non puoi mangiare questo cibo! 🚫 È troppo piccante."
+        else:
+            return "Puoi mangiare questo cibo! 🥳"
+
+# Evento di avvio del bot
+@bot.event
+async def on_ready():
+    print('Bot avviato come', bot.user)
+
+# Token del bot Discord
+bot.run("discord_tokn")
+
